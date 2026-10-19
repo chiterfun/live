@@ -36,7 +36,6 @@
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
         }
 
-        
         @keyframes roadMove {
             0% { background-position: 0 0; }
             100% { background-position: -80px 0; }
@@ -72,7 +71,6 @@
             filter: drop-shadow(0 0 8px #38bdf8);
         }
 
-        
         .leaflet-layer, .leaflet-control-zoom-in, .leaflet-control-zoom-out, .leaflet-control-attribution {
             filter: invert(100%) hue-rotate(180deg) brightness(93%) contrast(90%);
         }
@@ -91,11 +89,8 @@
 </head>
 <body class="min-h-screen pb-16 selection:bg-sky-500 selection:text-slate-950">
 
-  
     <header class="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-xl border-b border-slate-800/80">
         <div class="max-w-[1440px] mx-auto px-4 lg:px-8 py-3 flex flex-wrap justify-between items-center gap-3">
-            
-           
             <div class="flex items-center gap-3.5">
                 <div class="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-sky-500/25 border border-sky-400/30">
                     <i class="fa-solid fa-truck-fast text-white text-lg"></i>
@@ -130,14 +125,13 @@
                 </button>
             </div>
 
-           
             <div class="flex flex-wrap items-center gap-2">
                 <div id="fileStatusBadge" class="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-medium">
                     <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
                     <span id="fileStatusText">Кэш (привяжите файл)</span>
                 </div>
 
-                <button onclick="bindLocalFile()" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition" title="Напрямую сохранять все расчеты в файл на диске">
+                <button onclick="bindLocalFile()" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition">
                     <i class="fa-solid fa-hard-drive"></i>
                     <span class="hidden sm:inline">Файл автосохранения</span>
                 </button>
@@ -163,10 +157,7 @@
     </header>
 
     <main class="max-w-[1440px] mx-auto px-4 lg:px-8 mt-6">
-
-       
         <div id="viewCockpit" class="space-y-6">
-
             <section class="cockpit-panel rounded-3xl p-6 relative overflow-hidden">
                 <div class="flex flex-wrap justify-between items-end gap-4 mb-5 relative z-10">
                     <div>
@@ -198,7 +189,6 @@
                     </div>
                 </div>
 
-            
                 <div class="relative h-28 rounded-2xl bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border border-slate-800/90 overflow-hidden shadow-inner">
                     <div class="absolute inset-x-6 top-2.5 flex justify-between text-[10px] mono text-slate-500 font-bold z-10">
                         <span>СТАРТ (0%)</span>
@@ -208,14 +198,10 @@
                         <span class="text-emerald-400"><i class="fa-solid fa-flag-checkered mr-1"></i>НОРМА 100%</span>
                     </div>
 
-                    
                     <div id="truckTrailBar" class="absolute left-0 bottom-0 h-11 bg-gradient-to-r from-sky-600/25 via-blue-500/35 to-sky-400/55 border-t border-sky-400/60 transition-all duration-1000 ease-out" style="width: 4%"></div>
-
-                  
                     <div class="absolute inset-x-0 bottom-4 h-1 animated-road opacity-75"></div>
                     <div class="absolute inset-x-0 bottom-0 h-2 bg-slate-950"></div>
 
-                
                     <div id="truckContainer" class="absolute bottom-2.5 transition-all duration-1000 ease-out z-20" style="left: calc(4% - 45px);">
                         <div class="relative flex items-center">
                             <div class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded bg-sky-500 text-slate-950 font-extrabold text-[10px] mono shadow-lg">
@@ -240,7 +226,6 @@
                 </div>
             </section>
 
-            
             <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 <div class="cockpit-panel rounded-2xl p-5 flex justify-between items-center">
                     <div>
@@ -289,10 +274,7 @@
                 </div>
             </section>
 
-           
             <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                
-               
                 <div class="lg:col-span-7 cockpit-panel rounded-3xl p-6 flex flex-col justify-between">
                     <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
                         <div>
@@ -339,7 +321,6 @@
                     </div>
                 </div>
 
-                
                 <div class="lg:col-span-5 cockpit-panel rounded-3xl p-6">
                     <div class="flex justify-between items-center mb-4">
                         <div>
@@ -427,7 +408,6 @@
                 </div>
             </section>
 
-
             <section class="cockpit-panel rounded-3xl overflow-hidden">
                 <div class="p-5 border-b border-slate-800 flex flex-wrap justify-between items-center gap-4">
                     <h2 class="text-lg font-extrabold text-white flex items-center gap-2">
@@ -464,10 +444,7 @@
             </section>
         </div>
 
-      
         <div id="viewGps" class="hidden space-y-5">
-
-      
             <section class="cockpit-panel rounded-3xl p-5 border border-sky-500/30">
                 <div class="flex flex-wrap justify-between items-center gap-4">
                     <div>
@@ -483,7 +460,6 @@
                         <p class="text-xs text-slate-400">Принимает координаты напрямую из приложения</p>
                     </div>
 
-                   
                     <div class="flex flex-wrap items-center gap-2.5">
                         <div class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 flex items-center gap-2">
                             <span class="text-[10px] uppercase font-bold text-slate-400">Device ID:</span>
@@ -493,13 +469,11 @@
                             </button>
                         </div>
 
-                        
                         <button id="browserGpsBtn" onclick="toggleBrowserGps()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold flex items-center gap-2 transition">
                             <i class="fa-solid fa-mobile-screen"></i>
                             <span>Встроенный GPS браузера</span>
                         </button>
 
-                       
                         <button onclick="transferGpsTripToTimesheet()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-extrabold text-xs shadow-lg shadow-emerald-500/20 flex items-center gap-2 transition">
                             <i class="fa-solid fa-file-import"></i>
                             <span>Завершить рейс и перенести в табель</span>
@@ -508,7 +482,6 @@
                 </div>
             </section>
 
-          
             <section class="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
                 <div class="cockpit-panel rounded-2xl p-4 flex items-center justify-between">
                     <div>
@@ -583,14 +556,11 @@
                 </div>
             </section>
 
-           
             <section class="cockpit-panel rounded-3xl p-3 relative">
                 <div id="liveGpsMap"></div>
             </section>
         </div>
-
     </main>
-
 
     <div id="routesModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
         <div class="cockpit-panel w-full max-w-4xl rounded-3xl border border-slate-700 p-6 space-y-5 max-h-[90vh] overflow-y-auto">
@@ -679,7 +649,6 @@
     </div>
 
     <script>
-       
         const DEFAULT_ROUTES = [
             { id: 'msc_babushkina', name: 'Вологда АТП — Вологда МСЦ', address: 'ул. Гиляровского, 54А → пл. Бабушкина, 1 (МСЦ)', oneWayKm: 6, start: '07:30', end: '10:30', breakMins: 0, bonus: 450, mapX: 195, mapY: 225, lat: 59.2067, lng: 39.8825 },
             { id: 'totma_sov10',    name: 'Вологда АТП — Тотьма',      address: 'ул. Гиляровского, 54А → г. Тотьма, ул. Советская, 10', oneWayKm: 215, start: '06:00', end: '15:30', breakMins: 45, bonus: 700, mapX: 365, mapY: 135, lat: 59.9748, lng: 42.7592 },
@@ -703,7 +672,6 @@
         let activeRouteId = 'totma_sov10';
         let fileHandle = null;
 
-     
         let leafletMap = null;
         let truckMarker = null;
         let trackPolyline = null;
@@ -716,14 +684,13 @@
         let hasPrevFix = false;
         let manualStatusOverride = 'auto';
 
-       
         function initApp() {
             const raw = localStorage.getItem('vologdaUnifiedDB_v5');
             if (raw) {
                 try {
                     const parsed = JSON.parse(raw);
                     db = { ...db, ...parsed };
-                } catch (e) {}
+                } catch (e) { console.error('Ошибка чтения кэша:', e); }
             }
 
             if (db.deviceId) {
@@ -754,10 +721,9 @@
 
             loadMonthNorm();
             populateRoutesUI();
-            selectRoute(db.routes[1].id);
+            selectRoute(db.routes[1] ? db.routes[1].id : db.routes[0].id);
             renderAll();
 
-          
             initLeafletMap();
             connectMqttBroker();
         }
@@ -788,20 +754,18 @@
             document.getElementById('liveDateText').textContent = now.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short' });
         }
 
-        
         function initLeafletMap() {
+            if (!window.L) return;
             leafletMap = L.map('liveGpsMap').setView([59.55, 41.8], 7);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 18,
                 attribution: '© OSM • Вологда'
             }).addTo(leafletMap);
 
-            
             L.circleMarker([ATP_BASE_COORDS.lat, ATP_BASE_COORDS.lng], {
                 radius: 9, fillColor: '#10b981', color: '#050811', weight: 2, fillOpacity: 0.95
             }).addTo(leafletMap).bindPopup(`<b>${ATP_BASE_COORDS.name}</b>`);
 
-           
             db.routes.forEach(r => {
                 if (r.lat && r.lng) {
                     L.circleMarker([r.lat, r.lng], {
@@ -824,6 +788,7 @@
         }
 
         function connectMqttBroker() {
+            if (!window.mqtt) return;
             const devId = document.getElementById('deviceIdInput').value.trim() || 'kamaz54';
             db.deviceId = devId;
             persistDatabase();
@@ -833,42 +798,44 @@
             const badge = document.getElementById('mqttConnBadge');
             badge.textContent = 'Подключение к облаку...';
 
-            mqttClient = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
+            try {
+                mqttClient = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
+                const ownTracksTopic = `owntracks/+/${devId}`;
+                const webCustomTopic = `vologda/atp35/live/${devId}`;
 
-         
-            const ownTracksTopic = `owntracks/+/${devId}`;
-            const webCustomTopic = `vologda/atp35/live/${devId}`;
+                mqttClient.on('connect', () => {
+                    badge.textContent = `В ЭФИРЕ • ID: ${devId}`;
+                    badge.className = 'px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold mono';
+                    mqttClient.subscribe([ownTracksTopic, webCustomTopic], { qos: 0 });
+                });
 
-            mqttClient.on('connect', () => {
-                badge.textContent = `В ЭФИРЕ • ID: ${devId}`;
-                badge.className = 'px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold mono';
-                mqttClient.subscribe([ownTracksTopic, webCustomTopic], { qos: 0 });
-            });
+                mqttClient.on('error', (err) => {
+                    badge.textContent = 'Ошибка сети MQTT';
+                    badge.className = 'px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[11px] font-bold mono';
+                });
 
-            mqttClient.on('message', (topic, message) => {
-                try {
-                    const packet = JSON.parse(message.toString());
-                    
-                    
-                    if (packet._type === 'location' || (packet.lat !== undefined && packet.lon !== undefined)) {
-                        handleOwnTracksPacket(packet);
-                    } else if (packet.lat !== undefined && packet.lng !== undefined) {
-                        // Пакет от встроенного браузерного передатчика
-                        applyUnifiedTelemetry(packet);
-                    }
-                } catch (e) { console.error('Ошибка разбора GPS пакета:', e); }
-            });
+                mqttClient.on('message', (topic, message) => {
+                    try {
+                        const packet = JSON.parse(message.toString());
+                        if (packet._type === 'location' || (packet.lat !== undefined && packet.lon !== undefined)) {
+                            handleOwnTracksPacket(packet);
+                        } else if (packet.lat !== undefined && packet.lng !== undefined) {
+                            applyUnifiedTelemetry(packet);
+                        }
+                    } catch (e) { console.error('Ошибка разбора GPS пакета:', e); }
+                });
+            } catch (err) {
+                badge.textContent = 'MQTT недоступен';
+            }
         }
 
         function reconnectMqtt() {
             connectMqttBroker();
         }
 
-        
         function handleOwnTracksPacket(pkt) {
             const lat = Number(pkt.lat);
-            const lng = Number(pkt.lon);
-           
+            const lng = Number(pkt.lon || pkt.lng);
             const speedKmh = Math.max(0, Math.round(Number(pkt.vel || 0)));
             const accuracy = Math.round(Number(pkt.acc || 10));
             const battery = pkt.batt !== undefined ? `${pkt.batt}%` : '—%';
@@ -919,7 +886,6 @@
             document.getElementById('lastUpdateText').textContent = `Сигнал в ${data.timestamp}`;
             document.getElementById('phoneBatteryText').textContent = `Заряд: ${data.battery || '—'} • Точн: ±${data.accuracy || 10}м`;
 
-           
             const topBadge = document.getElementById('tabLiveSpeedBadge');
             topBadge.classList.remove('hidden');
             topBadge.textContent = `${data.speed} км/ч`;
@@ -945,7 +911,6 @@
             }
         }
 
-       
         function transferGpsTripToTimesheet() {
             const destId = document.getElementById('destSelect').value;
             if (db.routes.some(r => r.id === destId)) {
@@ -960,7 +925,6 @@
             }
             document.getElementById('shiftEnd').value = endStr;
 
-          
             if (gpsSessionKm >= 1) {
                 const roundedKm = Math.round(gpsSessionKm);
                 document.getElementById('shiftMileage').value = roundedKm;
@@ -1051,7 +1015,6 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         }
 
-        
         async function persistDatabase() {
             localStorage.setItem('vologdaUnifiedDB_v5', JSON.stringify(db));
             if (fileHandle) {
@@ -1137,6 +1100,7 @@
         function renderRadarSvg() {
             const linesG = document.getElementById('mapLinesGroup');
             const nodesG = document.getElementById('mapNodesGroup');
+            if (!linesG || !nodesG) return;
             linesG.innerHTML = '';
             nodesG.innerHTML = '';
             const hubX = 150, hubY = 210;
@@ -1371,9 +1335,9 @@
             document.getElementById('truckContainer').style.left = `calc(${clamped}% - 55px)`;
         }
 
-        
         function renderRoutesEditorTable() {
             const tbody = document.getElementById('routesEditorBody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             db.routes.forEach(r => {
                 const tr = document.createElement('tr');
