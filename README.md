@@ -3,15 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Вологда АТП • Бортовой комплекс: Табель + Рослятино + Live GPS</title>
+    <title>Бортовой комплекс Вологда G23</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-    
-    <!-- Карта дорог Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    <!-- MQTT клиент для OwnTracks -->
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
     <style>
@@ -40,6 +36,7 @@
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
         }
 
+        
         @keyframes roadMove {
             0% { background-position: 0 0; }
             100% { background-position: -80px 0; }
@@ -75,6 +72,7 @@
             filter: drop-shadow(0 0 8px #38bdf8);
         }
 
+        
         .leaflet-layer, .leaflet-control-zoom-in, .leaflet-control-zoom-out, .leaflet-control-attribution {
             filter: invert(100%) hue-rotate(180deg) brightness(93%) contrast(90%);
         }
@@ -93,10 +91,11 @@
 </head>
 <body class="min-h-screen pb-16 selection:bg-sky-500 selection:text-slate-950">
 
-    <!-- ВЕРХНИЙ БАР УПРАВЛЕНИЯ -->
+  
     <header class="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-xl border-b border-slate-800/80">
         <div class="max-w-[1440px] mx-auto px-4 lg:px-8 py-3 flex flex-wrap justify-between items-center gap-3">
             
+           
             <div class="flex items-center gap-3.5">
                 <div class="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-sky-500/25 border border-sky-400/30">
                     <i class="fa-solid fa-truck-fast text-white text-lg"></i>
@@ -105,50 +104,58 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-base sm:text-lg font-extrabold tracking-tight bg-gradient-to-r from-white via-sky-200 to-sky-400 bg-clip-text text-transparent">
-                            ВОЛОГДА АТП • БОРТОВОЙ КОМПЛЕКС
+                            ВОЛОГДА • БОРТОВОЙ КОМПЛЕКС
                         </h1>
                         <span class="hidden sm:inline-block text-[10px] mono uppercase px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-400 border border-sky-500/30 font-bold">
-                            Гиляровского 54А
+                            Северная
                         </span>
                     </div>
                     <div class="flex items-center gap-2 text-xs text-slate-400">
                         <span id="liveClock" class="mono text-sky-300 font-semibold">00:00:00</span>
                         <span>•</span>
-                        <span id="liveDateText">Дата ПК</span>
+                        <span id="liveDateText">Дата</span>
                     </div>
                 </div>
             </div>
 
-            <!-- ВКЛАДКИ -->
             <div class="flex bg-slate-900/95 p-1 rounded-2xl border border-slate-800">
                 <button id="tabBtnCockpit" onclick="switchMainTab('cockpit')" class="px-4 py-2 rounded-xl bg-sky-500 text-slate-950 font-extrabold text-xs flex items-center gap-2 transition shadow-lg shadow-sky-500/20">
                     <i class="fa-solid fa-clipboard-list"></i>
-                    <span>Табель, Маршруты и Зарплата</span>
+                    <span>Табель</span>
                 </button>
                 <button id="tabBtnGps" onclick="switchMainTab('gps')" class="px-4 py-2 rounded-xl text-slate-300 hover:text-white font-bold text-xs flex items-center gap-2 transition">
                     <i class="fa-solid fa-satellite-dish text-emerald-400 animate-pulse"></i>
-                    <span>Live GPS Карта (OwnTracks)</span>
+                    <span>Live GPS Карта</span>
                     <span id="tabLiveSpeedBadge" class="hidden px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 mono text-[10px]">0 км/ч</span>
                 </button>
             </div>
 
-            <!-- УПРАВЛЕНИЕ ФАЙЛОМ И МЕСЯЦЕМ -->
+           
             <div class="flex flex-wrap items-center gap-2">
-                <button onclick="bindLocalFile()" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition" title="Сохранять в файл на диске">
+                <div id="fileStatusBadge" class="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-medium">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                    <span id="fileStatusText">Кэш (привяжите файл)</span>
+                </div>
+
+                <button onclick="bindLocalFile()" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition" title="Напрямую сохранять все расчеты в файл на диске">
                     <i class="fa-solid fa-hard-drive"></i>
-                    <span class="hidden sm:inline">Файл БД</span>
+                    <span class="hidden sm:inline">Файл автосохранения</span>
                 </button>
-                <button onclick="downloadBackupFile()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sky-400 text-xs transition" title="Скачать файл">
+
+                <button onclick="downloadBackupFile()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sky-400 text-xs transition" title="Скачать файл базы (.json)">
                     <i class="fa-solid fa-download"></i>
                 </button>
-                <label class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 text-xs cursor-pointer transition" title="Открыть файл">
+
+                <label class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 text-xs cursor-pointer transition" title="Загрузить файл базы (.json)">
                     <i class="fa-solid fa-folder-open"></i>
                     <input type="file" accept=".json" class="hidden" onchange="importBackupFile(event)">
                 </label>
+
                 <div class="bg-slate-900 border border-slate-700 px-2.5 py-1.5 rounded-xl flex items-center gap-1.5">
                     <input type="month" id="monthPicker" class="bg-transparent text-white font-bold text-xs focus:outline-none cursor-pointer mono">
                 </div>
-                <button onclick="openModal('ratesModal')" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-sky-400 transition" title="Тарифы">
+
+                <button onclick="openModal('ratesModal')" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-sky-400 transition" title="Тарифы зарплаты и ДТ">
                     <i class="fa-solid fa-sliders"></i>
                 </button>
             </div>
@@ -157,25 +164,22 @@
 
     <main class="max-w-[1440px] mx-auto px-4 lg:px-8 mt-6">
 
-        <!-- =========================================================================
-             ВКЛАДКА 1: ТАБЕЛЬ И СХЕМА МАРШРУТОВ
-             ========================================================================= -->
+       
         <div id="viewCockpit" class="space-y-6">
 
-            <!-- 1. АНИМИРОВАННАЯ ШКАЛА НОРМЫ -->
             <section class="cockpit-panel rounded-3xl p-6 relative overflow-hidden">
                 <div class="flex flex-wrap justify-between items-end gap-4 mb-5 relative z-10">
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="px-2.5 py-0.5 rounded-md bg-sky-500/20 text-sky-400 border border-sky-500/30 text-[11px] font-bold uppercase tracking-wider mono">
-                                <i class="fa-solid fa-route mr-1"></i>Норма времени месяца
+                                <i class="fa-solid fa-route mr-1"></i>Шкала выполнения месячной нормы
                             </span>
                             <span id="overtimeBadge" class="hidden px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[11px] font-bold uppercase tracking-wider mono animate-pulse">
                                 🔥 Переработка сверх нормы!
                             </span>
                         </div>
                         <h2 class="text-xl sm:text-2xl font-extrabold text-white mt-1.5 flex items-center gap-3">
-                            <span>Вологда АТП (Гиляровского 54А)</span>
+                            <span>Вологда</span>
                             <i class="fa-solid fa-arrow-right-long text-sky-400 text-base"></i>
                             <span id="highwayTargetText" class="text-sky-400">Норма: 160 ч</span>
                         </h2>
@@ -194,24 +198,36 @@
                     </div>
                 </div>
 
+            
                 <div class="relative h-28 rounded-2xl bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border border-slate-800/90 overflow-hidden shadow-inner">
                     <div class="absolute inset-x-6 top-2.5 flex justify-between text-[10px] mono text-slate-500 font-bold z-10">
-                        <span>СТАРТ (0%)</span><span>25%</span><span>50% ЭКВАТОР</span><span>75%</span><span class="text-emerald-400">НОРМА 100%</span>
+                        <span>СТАРТ (0%)</span>
+                        <span>25%</span>
+                        <span>50%</span>
+                        <span>75%</span>
+                        <span class="text-emerald-400"><i class="fa-solid fa-flag-checkered mr-1"></i>НОРМА 100%</span>
                     </div>
+
+                    
                     <div id="truckTrailBar" class="absolute left-0 bottom-0 h-11 bg-gradient-to-r from-sky-600/25 via-blue-500/35 to-sky-400/55 border-t border-sky-400/60 transition-all duration-1000 ease-out" style="width: 4%"></div>
+
+                  
                     <div class="absolute inset-x-0 bottom-4 h-1 animated-road opacity-75"></div>
                     <div class="absolute inset-x-0 bottom-0 h-2 bg-slate-950"></div>
 
+                
                     <div id="truckContainer" class="absolute bottom-2.5 transition-all duration-1000 ease-out z-20" style="left: calc(4% - 45px);">
                         <div class="relative flex items-center">
                             <div class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded bg-sky-500 text-slate-950 font-extrabold text-[10px] mono shadow-lg">
                                 <span id="truckFloatingHours">0 ч 00 м</span>
                             </div>
+
                             <svg width="118" height="48" viewBox="0 0 118 48" class="truck-body-anim drop-shadow-[0_0_12px_rgba(56,189,248,0.45)]">
                                 <rect x="4" y="6" width="66" height="28" rx="3" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
-                                <text x="37" y="23" fill="#38bdf8" font-size="8" font-family="monospace" font-weight="bold" text-anchor="middle">АТП ВОЛОГДА</text>
+                                <text x="37" y="23" fill="#38bdf8" font-size="8" font-family="monospace" font-weight="bold" text-anchor="middle">35 rus</text>
                                 <rect x="70" y="26" width="6" height="4" fill="#64748b"/>
                                 <path d="M74 10 H94 C98 10 102 15 104 21 L107 26 V34 H74 V10 Z" fill="#0284c7" stroke="#7dd3fc" stroke-width="1.2"/>
+                                <path d="M92 13 H97 L102 22 H92 V13 Z" fill="#e0f2fe" opacity="0.9"/>
                                 <circle cx="106" cy="31" r="2" fill="#fef08a"/>
                                 <g class="wheel-spin" style="transform-box: fill-box;"><circle cx="16" cy="36" r="6" fill="#0f172a" stroke="#94a3b8" stroke-width="2"/></g>
                                 <g class="wheel-spin" style="transform-box: fill-box;"><circle cx="30" cy="36" r="6" fill="#0f172a" stroke="#94a3b8" stroke-width="2"/></g>
@@ -224,57 +240,75 @@
                 </div>
             </section>
 
-            <!-- 2. СТАТИСТИКА -->
+            
             <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 <div class="cockpit-panel rounded-2xl p-5 flex justify-between items-center">
                     <div>
                         <span class="text-[11px] font-bold uppercase text-slate-400">Отработано за месяц</span>
                         <h3 id="statWorkedHours" class="text-2xl font-black text-white mono mt-1">0 ч 00 м</h3>
-                        <p id="statShiftsTotal" class="text-xs text-sky-400 mt-1 font-medium">Смен: 0</p>
+                        <p id="statShiftsTotal" class="text-xs text-sky-400 mt-1 font-medium">Выполнено смен: 0</p>
                     </div>
-                    <div class="w-14 h-14 rounded-2xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400 text-2xl"><i class="fa-regular fa-clock"></i></div>
+                    <div class="w-14 h-14 rounded-2xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400 text-2xl">
+                        <i class="fa-regular fa-clock"></i>
+                    </div>
                 </div>
+
                 <div class="cockpit-panel rounded-2xl p-5 flex justify-between items-center">
                     <div>
                         <span id="statRemainTitle" class="text-[11px] font-bold uppercase text-slate-400">Осталось до нормы</span>
                         <h3 id="statRemainHours" class="text-2xl font-black text-emerald-400 mono mt-1">160 ч 00 м</h3>
-                        <p id="statRemainSub" class="text-xs text-slate-400 mt-1">План месяца</p>
+                        <p id="statRemainSub" class="text-xs text-slate-400 mt-1">Норма: 160 часов</p>
                     </div>
-                    <div class="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-2xl"><i class="fa-solid fa-hourglass-half"></i></div>
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-2xl">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                    </div>
                 </div>
+
                 <div class="cockpit-panel rounded-2xl p-5 flex justify-between items-center">
                     <div>
                         <span class="text-[11px] font-bold uppercase text-slate-400">Пробег и Топливо (ДТ)</span>
                         <h3 id="statTotalKm" class="text-2xl font-black text-indigo-400 mono mt-1">0 км</h3>
-                        <p class="text-xs text-amber-400 mt-1 font-semibold">Расход: <span id="statTotalFuel" class="mono">0.0 л</span> (<span id="statFuelCost">0 ₽</span>)</p>
+                        <p class="text-xs text-amber-400 mt-1 font-semibold">
+                            Расход: <span id="statTotalFuel" class="mono">0.0 л</span> (<span id="statFuelCost">0 ₽</span>)
+                        </p>
                     </div>
-                    <div class="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl"><i class="fa-solid fa-gas-pump"></i></div>
+                    <div class="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl">
+                        <i class="fa-solid fa-gas-pump"></i>
+                    </div>
                 </div>
+
                 <div class="cockpit-panel rounded-2xl p-5 flex justify-between items-center border-emerald-500/25">
                     <div>
                         <span class="text-[11px] font-bold uppercase text-emerald-300/80">Заработано за месяц</span>
                         <h3 id="statTotalSalary" class="text-2xl font-black text-emerald-400 mono mt-1">0 ₽</h3>
-                        <p class="text-[11px] text-slate-400 mt-1">С ставка + КМ + Бонус</p>
+                        <p class="text-[11px] text-slate-400 mt-1">Часы + КМ + Выезды/Точки</p>
                     </div>
-                    <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 text-2xl"><i class="fa-solid fa-ruble-sign"></i></div>
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 text-2xl">
+                        <i class="fa-solid fa-ruble-sign"></i>
+                    </div>
                 </div>
             </section>
 
-            <!-- 3. КАРТА И ФОРМА СМЕНЫ -->
+           
             <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
+               
                 <div class="lg:col-span-7 cockpit-panel rounded-3xl p-6 flex flex-col justify-between">
                     <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
                         <div>
-                            <span class="text-[11px] font-bold uppercase tracking-wider text-sky-400 mono">Направления от Гиляровского 54А</span>
-                            <h2 class="text-lg font-extrabold text-white mt-0.5">Схема маршрутов АТП</h2>
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-sky-400 mono">
+                                Справочник направлений
+                            </span>
+                            <h2 class="text-lg font-extrabold text-white mt-0.5">Схема маршрутов и быстрый выбор</h2>
                         </div>
                         <div class="flex gap-2">
                             <button onclick="switchMainTab('gps')" class="px-3 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 transition">
-                                <i class="fa-solid fa-satellite-dish"></i><span>Live GPS</span>
+                                <i class="fa-solid fa-map-location-dot"></i>
+                                <span>Открыть Live GPS карту</span>
                             </button>
                             <button onclick="openModal('routesModal')" class="px-3 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 text-xs font-bold flex items-center gap-1.5 transition">
-                                <i class="fa-solid fa-pen-ruler"></i><span>Маршруты</span>
+                                <i class="fa-solid fa-pen-ruler"></i>
+                                <span>Редактировать маршруты</span>
                             </button>
                         </div>
                     </div>
@@ -291,10 +325,10 @@
                         <div class="absolute bottom-3 right-3 sm:w-80 bg-slate-900/95 backdrop-blur-md border border-sky-500/40 rounded-xl p-3 shadow-xl">
                             <div class="flex items-start justify-between gap-2">
                                 <div>
-                                    <h4 id="cardRouteName" class="text-xs font-extrabold text-white">Вологда — Тотьма — Рослятино</h4>
-                                    <p id="cardRouteAddr" class="text-[10px] text-slate-400 mt-0.5">Вт, Чт (+ Никольск, В.Устюг по запросу)</p>
+                                    <h4 id="cardRouteName" class="text-xs font-extrabold text-white">Вологда АТП — Никольск</h4>
+                                    <p id="cardRouteAddr" class="text-[10px] text-slate-400 mt-0.5">Гиляровского 54А → Советская 113</p>
                                 </div>
-                                <span id="cardRouteKm" class="text-sm font-black text-sky-400 mono">690 км</span>
+                                <span id="cardRouteKm" class="text-sm font-black text-sky-400 mono">872 км</span>
                             </div>
                         </div>
                     </div>
@@ -305,14 +339,16 @@
                     </div>
                 </div>
 
-                <!-- ФОРМА ПУТЕВОГО ЛИСТА -->
+                
                 <div class="lg:col-span-5 cockpit-panel rounded-3xl p-6">
                     <div class="flex justify-between items-center mb-4">
                         <div>
                             <span class="text-[11px] font-bold uppercase text-emerald-400 mono">Путевой лист</span>
                             <h2 id="shiftFormTitle" class="text-lg font-extrabold text-white mt-0.5">Оформление смены</h2>
                         </div>
-                        <button type="button" id="cancelEditShiftBtn" onclick="resetShiftForm()" class="hidden px-3 py-1 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold">Отмена</button>
+                        <button type="button" id="cancelEditShiftBtn" onclick="resetShiftForm()" class="hidden px-3 py-1 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold">
+                            Отмена
+                        </button>
                     </div>
 
                     <form id="shiftForm" class="space-y-3.5">
@@ -329,25 +365,10 @@
                             </div>
                         </div>
 
-                        <!-- Чекбоксы запросов (Никольск / Великий Устюг) -->
-                        <div id="requestOptionsBox" class="bg-slate-950/85 p-3 rounded-xl border border-slate-800 space-y-2 hidden">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400 block">Дополнительные заезды по запросу:</span>
-                            <div class="flex flex-wrap gap-4 text-xs font-semibold">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" id="reqNikolsk" onchange="recalcCustomRoute()" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-sky-500">
-                                    <span>Заезд в Никольск (+140 км круг)</span>
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" id="reqUstyug" onchange="recalcCustomRoute()" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-sky-500">
-                                    <span>Заезд в В. Устюг (+160 км круг)</span>
-                                </label>
-                            </div>
-                        </div>
-
                         <div class="bg-slate-950/70 p-2 rounded-xl border border-slate-800 flex items-center justify-between">
                             <span class="text-xs font-semibold text-slate-300 pl-1">Расчет плеча:</span>
                             <div class="flex rounded-lg bg-slate-900 p-0.5 border border-slate-800 text-xs font-bold">
-                                <button type="button" id="tripModeRound" onclick="setTripMode('round')" class="px-3 py-1 rounded-md bg-sky-500 text-slate-950">Кругорейс</button>
+                                <button type="button" id="tripModeRound" onclick="setTripMode('round')" class="px-3 py-1 rounded-md bg-sky-500 text-slate-950">Туда-обратно (Круг)</button>
                                 <button type="button" id="tripModeSingle" onclick="setTripMode('single')" class="px-3 py-1 rounded-md text-slate-400">В 1 сторону</button>
                             </div>
                         </div>
@@ -363,7 +384,7 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Обед (м)</label>
-                                <input type="number" id="shiftBreak" min="0" value="60" required oninput="updateLiveShiftPreview()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm font-bold mono">
+                                <input type="number" id="shiftBreak" min="0" value="45" required oninput="updateLiveShiftPreview()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm font-bold mono">
                             </div>
                         </div>
 
@@ -383,7 +404,7 @@
                         </div>
 
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Примечание / Дни недели</label>
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Примечание / Точный адрес</label>
                             <input type="text" id="shiftNotes" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 text-xs">
                         </div>
 
@@ -399,20 +420,23 @@
                         </div>
 
                         <button type="submit" id="submitShiftBtn" class="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-slate-950 font-extrabold text-sm shadow-xl flex items-center justify-center gap-2 transition">
-                            <i class="fa-solid fa-floppy-disk"></i><span>Записать смену в табель</span>
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>Записать смену в табель</span>
                         </button>
                     </form>
                 </div>
             </section>
 
-            <!-- 4. ТАБЛИЦА -->
+
             <section class="cockpit-panel rounded-3xl overflow-hidden">
                 <div class="p-5 border-b border-slate-800 flex flex-wrap justify-between items-center gap-4">
                     <h2 class="text-lg font-extrabold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-table-list text-sky-400"></i><span>Журнал рейсов за месяц</span>
+                        <i class="fa-solid fa-table-list text-sky-400"></i>
+                        <span>Журнал выполненных рейсов за месяц</span>
                     </h2>
                     <button onclick="exportToExcelCSV()" class="px-4 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-2 transition">
-                        <i class="fa-solid fa-file-csv"></i><span>Выгрузить ведомость в Excel (CSV)</span>
+                        <i class="fa-solid fa-file-csv"></i>
+                        <span>Скачать в Excel (CSV)</span>
                     </button>
                 </div>
 
@@ -420,181 +444,252 @@
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-950/60 text-slate-400 text-[11px] uppercase font-bold border-b border-slate-800">
-                                <th class="py-3.5 px-5">Дата</th><th class="py-3.5 px-4">Маршрут и точки</th><th class="py-3.5 px-4">График</th><th class="py-3.5 px-4">Чистое время</th><th class="py-3.5 px-4">Пробег</th><th class="py-3.5 px-4">Топливо</th><th class="py-3.5 px-4">Зарплата</th><th class="py-3.5 px-5 text-right">Действия</th>
+                                <th class="py-3.5 px-5">Дата</th>
+                                <th class="py-3.5 px-4">Маршрут и адреса точек</th>
+                                <th class="py-3.5 px-4">График</th>
+                                <th class="py-3.5 px-4">Чистое время</th>
+                                <th class="py-3.5 px-4">Пробег</th>
+                                <th class="py-3.5 px-4">Топливо</th>
+                                <th class="py-3.5 px-4">Зарплата</th>
+                                <th class="py-3.5 px-5 text-right">Действия</th>
                             </tr>
                         </thead>
                         <tbody id="shiftsTableBody" class="divide-y divide-slate-800/60 text-sm"></tbody>
                     </table>
                 </div>
-                <div id="emptyShiftsState" class="p-10 text-center text-slate-500 hidden"><p class="text-sm font-semibold text-slate-400">В этом месяце еще нет смен</p></div>
+
+                <div id="emptyShiftsState" class="p-10 text-center text-slate-500 hidden">
+                    <p class="text-sm font-semibold text-slate-400">В выбранном месяце еще нет записанных смен</p>
+                </div>
             </section>
         </div>
 
-        <!-- =========================================================================
-             ВКЛАДКА 2: LIVE GPS (OWNTRACKS)
-             ========================================================================= -->
+      
         <div id="viewGps" class="hidden space-y-5">
+
+      
             <section class="cockpit-panel rounded-3xl p-5 border border-sky-500/30">
                 <div class="flex flex-wrap justify-between items-center gap-4">
                     <div>
                         <div class="flex items-center gap-2">
-                            <span id="mqttConnBadge" class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] font-bold mono">Подключение...</span>
-                            <span id="gpsSourceBadge" class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 text-[11px] font-semibold mono">Источник: Ожидание</span>
+                            <span id="mqttConnBadge" class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] font-bold mono">
+                                Подключение...
+                            </span>
+                            <span id="gpsSourceBadge" class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 text-[11px] font-semibold mono">
+                                Источник: Ожидание сигнала
+                            </span>
                         </div>
-                        <h2 class="text-lg font-extrabold text-white mt-1.5">Мониторинг OwnTracks в реальном времени</h2>
+                        <h2 class="text-lg font-extrabold text-white mt-1.5">Спутниковый мониторинг</h2>
+                        <p class="text-xs text-slate-400">Принимает координаты напрямую из приложения</p>
                     </div>
+
+                   
                     <div class="flex flex-wrap items-center gap-2.5">
                         <div class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 flex items-center gap-2">
                             <span class="text-[10px] uppercase font-bold text-slate-400">Device ID:</span>
-                            <input type="text" id="deviceIdInput" value="kamaz54" class="bg-transparent text-sky-400 font-extrabold text-xs mono w-28 focus:outline-none">
-                            <button onclick="reconnectMqtt()" class="text-xs text-slate-400 hover:text-white"><i class="fa-solid fa-rotate"></i></button>
+                            <input type="text" id="deviceIdInput" value="kamaz54" class="bg-transparent text-sky-400 font-extrabold text-xs mono w-28 focus:outline-none" title="Укажите тот же Device ID, который прописали в настройках OwnTracks">
+                            <button onclick="reconnectMqtt()" class="text-xs text-slate-400 hover:text-white" title="Переподключить канал">
+                                <i class="fa-solid fa-rotate"></i>
+                            </button>
                         </div>
-                        <button onclick="transferGpsTripToTimesheet()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-extrabold text-xs shadow-lg flex items-center gap-2">
-                            <i class="fa-solid fa-file-import"></i><span>Перенести рейс в табель</span>
+
+                        
+                        <button id="browserGpsBtn" onclick="toggleBrowserGps()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold flex items-center gap-2 transition">
+                            <i class="fa-solid fa-mobile-screen"></i>
+                            <span>Встроенный GPS браузера</span>
+                        </button>
+
+                       
+                        <button onclick="transferGpsTripToTimesheet()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-extrabold text-xs shadow-lg shadow-emerald-500/20 flex items-center gap-2 transition">
+                            <i class="fa-solid fa-file-import"></i>
+                            <span>Завершить рейс и перенести в табель</span>
                         </button>
                     </div>
                 </div>
             </section>
 
+          
             <section class="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
                 <div class="cockpit-panel rounded-2xl p-4 flex items-center justify-between">
                     <div>
-                        <span class="text-[10px] font-bold uppercase text-slate-400">Скорость</span>
-                        <div class="flex items-baseline gap-1 mt-1"><span id="liveSpeedVal" class="text-3xl font-black text-sky-400 mono">0</span><span class="text-xs text-slate-400 font-bold">км/ч</span></div>
+                        <span class="text-[10px] font-bold uppercase text-slate-400">Скорость (GPS)</span>
+                        <div class="flex items-baseline gap-1 mt-1">
+                            <span id="liveSpeedVal" class="text-3xl font-black text-sky-400 mono">0</span>
+                            <span class="text-xs text-slate-400 font-bold">км/ч</span>
+                        </div>
                     </div>
-                    <div class="w-11 h-11 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400 text-lg"><i class="fa-solid fa-gauge-high"></i></div>
+                    <div class="w-11 h-11 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400 text-lg">
+                        <i class="fa-solid fa-gauge-high"></i>
+                    </div>
                 </div>
+
                 <div class="cockpit-panel rounded-2xl p-4 flex items-center justify-between">
                     <div>
-                        <span class="text-[10px] font-bold uppercase text-slate-400">Статус</span>
-                        <div id="liveVehicleStatus" class="text-sm font-extrabold text-amber-400 mt-1.5 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span><span>ЖДЕМ СИГНАЛ</span></div>
+                        <span class="text-[10px] font-bold uppercase text-slate-400">Статус машины</span>
+                        <div id="liveVehicleStatus" class="text-sm font-extrabold text-amber-400 mt-1.5 flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
+                            <span>ЖДЕМ СИГНАЛ</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-1">
+                        <button onclick="sendManualStatus('rest')" class="p-2 rounded-lg bg-slate-800 hover:bg-sky-500/20 text-slate-300 text-xs" title="Поставить статус: Отдых / Обед">☕</button>
+                        <button onclick="sendManualStatus('auto')" class="p-2 rounded-lg bg-slate-800 hover:bg-emerald-500/20 text-slate-300 text-xs" title="Автоматический статус по скорости">🚗</button>
                     </div>
                 </div>
+
                 <div class="cockpit-panel rounded-2xl p-4 flex items-center justify-between">
                     <div>
-                        <span class="text-[10px] font-bold uppercase text-slate-400">Пройдено</span>
-                        <div class="flex items-baseline gap-1 mt-1"><span id="liveSessionKm" class="text-2xl font-black text-indigo-400 mono">0.0</span><span class="text-xs text-slate-400 font-bold">км</span></div>
+                        <span class="text-[10px] font-bold uppercase text-slate-400">Пройдено за рейс</span>
+                        <div class="flex items-baseline gap-1 mt-1">
+                            <span id="liveSessionKm" class="text-2xl font-black text-indigo-400 mono">0.0</span>
+                            <span class="text-xs text-slate-400 font-bold">км</span>
+                        </div>
                     </div>
-                    <button onclick="resetGpsTripCounter()" class="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-rose-300 text-xs"><i class="fa-solid fa-rotate-left"></i></button>
+                    <button onclick="resetGpsTripCounter()" class="p-2 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 text-xs" title="Обнулить суточный GPS-одометр">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
                 </div>
+
                 <div class="cockpit-panel rounded-2xl p-4 flex items-center justify-between">
                     <div class="w-full">
-                        <div class="flex justify-between items-center"><span class="text-[10px] font-bold uppercase text-slate-400">Цель</span>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-bold uppercase text-slate-400">Цель маршрута</span>
                             <select id="destSelect" onchange="updateTargetDistance()" class="bg-slate-900 text-[10px] text-sky-300 font-bold rounded px-1.5 py-0.5 border border-slate-700">
-                                <option value="roslyatino" selected>Рослятино (Вт, Чт)</option><option value="totma">Тотьма</option><option value="nikolsk">Никольск</option>
+                                <option value="msc_babushkina">МСЦ Бабушкина 1</option>
+                                <option value="totma_sov10" selected>Тотьма (Сов. 10)</option>
+                                <option value="nikolsk_sov113">Никольск (Сов. 113)</option>
+                                <option value="ustyug">Великий Устюг</option>
+                                <option value="vytegra">Вытегра</option>
+                                <option value="cherepovets">Череповец</option>
+                                <option value="atp_base">АТП (Гиляровского 54А)</option>
                             </select>
                         </div>
-                        <div class="flex items-baseline justify-between mt-1.5"><span id="distToDestVal" class="text-2xl font-black text-emerald-400 mono">— км</span><span id="etaVal" class="text-[11px] text-slate-400 mono">РВП: —</span></div>
+                        <div class="flex items-baseline justify-between mt-1.5">
+                            <span id="distToDestVal" class="text-2xl font-black text-emerald-400 mono">— км</span>
+                            <span id="etaVal" class="text-[11px] text-slate-400 mono">РВП: —</span>
+                        </div>
                     </div>
                 </div>
+
                 <div class="cockpit-panel rounded-2xl p-4 flex items-center justify-between col-span-2 lg:col-span-1">
                     <div>
-                        <span class="text-[10px] font-bold uppercase text-slate-400">Спутники</span>
+                        <span class="text-[10px] font-bold uppercase text-slate-400">Заряд и спутники</span>
                         <div id="lastUpdateText" class="text-xs font-extrabold text-white mono mt-1">Нет пакетов</div>
-                        <div id="phoneBatteryText" class="text-[11px] text-emerald-400 mt-0.5 font-semibold">Батарея: —%</div>
+                        <div id="phoneBatteryText" class="text-[11px] text-emerald-400 mt-0.5 font-semibold">Батарея: —% • Точн: —м</div>
                     </div>
-                    <button onclick="centerMapOnTruck()" class="w-10 h-10 rounded-xl bg-slate-800 text-sky-400 flex items-center justify-center"><i class="fa-solid fa-location-crosshairs"></i></button>
+                    <button onclick="centerMapOnTruck()" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-sky-500 hover:text-slate-950 text-sky-400 flex items-center justify-center transition" title="Центрировать на грузовике">
+                        <i class="fa-solid fa-location-crosshairs"></i>
+                    </button>
                 </div>
             </section>
 
-            <section class="cockpit-panel rounded-3xl p-3 relative"><div id="liveGpsMap"></div></section>
+           
+            <section class="cockpit-panel rounded-3xl p-3 relative">
+                <div id="liveGpsMap"></div>
+            </section>
         </div>
 
     </main>
 
-    <!-- МОДАЛЬНОЕ ОКНО: МАРШРУТЫ -->
+
     <div id="routesModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
         <div class="cockpit-panel w-full max-w-4xl rounded-3xl border border-slate-700 p-6 space-y-5 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center">
                 <h3 class="text-lg font-extrabold text-white">Редактор маршрутов</h3>
-                <button onclick="closeModal('routesModal')" class="w-9 h-9 rounded-xl bg-slate-800 text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="closeModal('routesModal')" class="w-9 h-9 rounded-xl bg-slate-800 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
+
             <div class="overflow-x-auto border border-slate-800 rounded-2xl">
                 <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-950 text-slate-400 uppercase font-bold"><tr><th class="p-3">Маршрут</th><th class="p-3">Адрес</th><th class="p-3">Плечо</th><th class="p-3">Круг</th><th class="p-3">Бонус</th><th class="p-3 text-right">Действие</th></tr></thead>
+                    <thead class="bg-slate-950 text-slate-400 uppercase font-bold">
+                        <tr>
+                            <th class="p-3">Маршрут</th>
+                            <th class="p-3">Адрес</th>
+                            <th class="p-3">Плечо 1 ст.</th>
+                            <th class="p-3">Круг</th>
+                            <th class="p-3">Бонус ₽</th>
+                            <th class="p-3 text-right">Действие</th>
+                        </tr>
+                    </thead>
                     <tbody id="routesEditorBody" class="divide-y divide-slate-800"></tbody>
                 </table>
             </div>
+
             <form id="routeEditorForm" class="grid grid-cols-1 sm:grid-cols-6 gap-3 bg-slate-950 p-4 rounded-2xl border border-slate-800">
                 <input type="hidden" id="editRouteId">
-                <div class="sm:col-span-2"><label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Название</label><input type="text" id="rName" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"></div>
-                <div class="sm:col-span-2"><label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Адрес</label><input type="text" id="rAddress" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"></div>
-                <div><label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Плечо км</label><input type="number" id="rOneWayKm" step="0.5" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white mono"></div>
-                <div><label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Бонус ₽</label><input type="number" id="rBonus" value="900" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white mono"></div>
-                <div class="sm:col-span-3 flex items-end"><button type="submit" class="py-2 px-4 rounded-xl bg-sky-500 text-slate-950 font-extrabold text-xs">Сохранить</button></div>
+                <div class="sm:col-span-2">
+                    <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Название</label>
+                    <input type="text" id="rName" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Точный адрес</label>
+                    <input type="text" id="rAddress" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Плечо 1 ст. (км)</label>
+                    <input type="number" id="rOneWayKm" step="0.5" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white mono">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Бонус ₽</label>
+                    <input type="number" id="rBonus" value="700" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white mono">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Выезд</label>
+                    <input type="time" id="rStart" value="06:00" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white mono">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Возврат</label>
+                    <input type="time" id="rEnd" value="18:00" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white mono">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Обед (мин)</label>
+                    <input type="number" id="rBreak" value="60" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white mono">
+                </div>
+                <div class="sm:col-span-3 flex items-end gap-2">
+                    <button type="submit" class="flex-1 py-2 px-4 rounded-xl bg-sky-500 text-slate-950 font-extrabold text-xs">Сохранить маршрут</button>
+                </div>
             </form>
         </div>
     </div>
 
-    <!-- МОДАЛЬНОЕ ОКНО: ТАРИФЫ -->
     <div id="ratesModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
         <div class="cockpit-panel w-full max-w-md rounded-3xl border border-slate-700 p-6 space-y-4">
-            <div class="flex justify-between items-center"><h3 class="text-lg font-extrabold text-white">Тарифы</h3><button onclick="closeModal('ratesModal')" class="w-9 h-9 rounded-xl bg-slate-800 text-slate-400"><i class="fa-solid fa-xmark"></i></button></div>
-            <div><label class="block text-xs font-bold text-slate-400 uppercase mb-1">Часовая ставка (₽/ч)</label><input type="number" id="cfgRateHour" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-white font-bold mono"></div>
-            <div><label class="block text-xs font-bold text-slate-400 uppercase mb-1">Оплата за 1 км (₽/км)</label><input type="number" id="cfgRateKm" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-white font-bold mono"></div>
-            <div><label class="block text-xs font-bold text-slate-400 uppercase mb-1">Норма ДТ (л/100км)</label><input type="number" id="cfgFuelNorm100" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-amber-300 font-bold mono"></div>
-            <div><label class="block text-xs font-bold text-slate-400 uppercase mb-1">Цена 1л ДТ (₽)</label><input type="number" id="cfgFuelPrice" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-amber-300 font-bold mono"></div>
-            <button onclick="saveRatesConfig()" class="w-full py-3 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-sm">Сохранить</button>
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-extrabold text-white">Тарифы оплаты и нормы ГСМ</h3>
+                <button onclick="closeModal('ratesModal')" class="w-9 h-9 rounded-xl bg-slate-800 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Часовая ставка (₽ / час)</label>
+                <input type="number" id="cfgRateHour" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-white font-bold mono">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Покилометровая оплата (₽ / км)</label>
+                <input type="number" id="cfgRateKm" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-white font-bold mono">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Норма расхода ДТ (л на 100 км)</label>
+                <input type="number" id="cfgFuelNorm100" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-amber-300 font-bold mono">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Цена 1 литра ДТ (₽)</label>
+                <input type="number" id="cfgFuelPrice" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-amber-300 font-bold mono">
+            </div>
+            <button onclick="saveRatesConfig()" class="w-full py-3 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-sm">Сохранить настройки</button>
         </div>
     </div>
 
     <script>
-        /********************************************************************
-         * СПРАВОЧНИК МАРШРУТОВ (С УЧЕТОМ РОСЛЯТИНО ВТ, ЧТ)
-         * - Вологда АТП (Гиляровского 54А) — Тотьма — Рослятино (Вт, Чт):
-         *   Базовое плечо в 1 сторону: Вологда -> Тотьма (215 км) -> Рослятино (130 км) = 345 км (круг 690 км).
-         *   Если по запросу заезжают в Никольск (+70 км плечо / +140 км круг)
-         *   Или в Великий Устюг (+80 км плечо / +160 км круг).
-         ********************************************************************/
+       
         const DEFAULT_ROUTES = [
-            {
-                id: 'roslyatino_wt',
-                name: 'Вологда — Тотьма — Рослятино (Вт, Чт)',
-                address: 'Гиляровского 54А → Тотьма → Рослятино (Вт, Чт)',
-                oneWayKm: 345, // круг 690 км
-                start: '04:00',
-                end: '20:00',
-                breakMins: 60,
-                bonus: 1200,
-                isCustomRoute: true, // Флаг поддержки чекбоксов запросов Никольск / В.Устюг
-                mapX: 480, mapY: 150, lat: 60.1500, lng: 44.2500
-            },
-            {
-                id: 'totma_sov10',
-                name: 'Вологда АТП — Тотьма',
-                address: 'Гиляровского 54А → г. Тотьма, ул. Советская, 10',
-                oneWayKm: 215, // круг 430 км
-                start: '06:00',
-                end: '15:30',
-                breakMins: 45,
-                bonus: 700,
-                mapX: 365, mapY: 135, lat: 59.9748, lng: 42.7592
-            },
-            {
-                id: 'nikolsk_sov113',
-                name: 'Вологда АТП — Никольск',
-                address: 'Гиляровского 54А → Никольск, Советская 113',
-                oneWayKm: 436, // круг 872 км
-                start: '04:30',
-                end: '19:30',
-                breakMins: 60,
-                bonus: 1000,
-                mapX: 545, mapY: 185, lat: 59.5312, lng: 45.4518
-            },
-            {
-                id: 'ustyug',
-                name: 'Вологда АТП — Великий Устюг',
-                address: 'Гиляровского 54А → Великий Устюг',
-                oneWayKm: 452, // круг 904 км
-                start: '04:00',
-                end: '20:00',
-                breakMins: 60,
-                bonus: 1000,
-                mapX: 635, mapY: 60, lat: 60.7618, lng: 46.2995
-            }
+            { id: 'msc_babushkina', name: 'Вологда АТП — Вологда МСЦ', address: 'ул. Гиляровского, 54А → пл. Бабушкина, 1 (МСЦ)', oneWayKm: 6, start: '07:30', end: '10:30', breakMins: 0, bonus: 450, mapX: 195, mapY: 225, lat: 59.2067, lng: 39.8825 },
+            { id: 'totma_sov10',    name: 'Вологда АТП — Тотьма',      address: 'ул. Гиляровского, 54А → г. Тотьма, ул. Советская, 10', oneWayKm: 215, start: '06:00', end: '15:30', breakMins: 45, bonus: 700, mapX: 365, mapY: 135, lat: 59.9748, lng: 42.7592 },
+            { id: 'nikolsk_sov113', name: 'Вологда АТП — Никольск',    address: 'ул. Гиляровского, 54А → г. Никольск, ул. Советская, 113', oneWayKm: 436, start: '04:30', end: '19:30', breakMins: 60, bonus: 1000, mapX: 545, mapY: 185, lat: 59.5312, lng: 45.4518 },
+            { id: 'ustyug',         name: 'Вологда АТП — Великий Устюг', address: 'ул. Гиляровского, 54А → г. Великий Устюг', oneWayKm: 452, start: '04:00', end: '20:00', breakMins: 60, bonus: 1000, mapX: 635, mapY: 60, lat: 60.7618, lng: 46.2995 },
+            { id: 'vytegra',        name: 'Вологда АТП — Вытегра',     address: 'ул. Гиляровского, 54А → г. Вытегра', oneWayKm: 332, start: '05:00', end: '17:30', breakMins: 60, bonus: 800, mapX: 65, mapY: 50, lat: 61.0064, lng: 36.4481 },
+            { id: 'cherepovets',    name: 'Вологда АТП — Череповец',   address: 'ул. Гиляровского, 54А → г. Череповец', oneWayKm: 138, start: '07:00', end: '14:30', breakMins: 30, bonus: 500, mapX: 55, mapY: 215, lat: 59.1323, lng: 37.9092 }
         ];
 
-        const ATP_BASE_COORDS = { name: 'Вологда АТП (Гиляровского 54А)', lat: 59.2285, lng: 39.9382 };
+        const ATP_BASE_COORDS = { name: 'Вологда АТП (ул. Гиляровского, 54А)', lat: 59.2285, lng: 39.9382 };
 
         let db = {
             deviceId: 'kamaz54',
@@ -605,9 +700,10 @@
         };
 
         let currentTripMode = 'round';
-        let activeRouteId = 'roslyatino_wt';
+        let activeRouteId = 'totma_sov10';
         let fileHandle = null;
 
+     
         let leafletMap = null;
         let truckMarker = null;
         let trackPolyline = null;
@@ -618,13 +714,21 @@
         let gpsTripStartTime = null;
         let lastCoords = { lat: ATP_BASE_COORDS.lat, lng: ATP_BASE_COORDS.lng };
         let hasPrevFix = false;
+        let manualStatusOverride = 'auto';
 
+       
         function initApp() {
-            const raw = localStorage.getItem('vologdaUnifiedDB_v6');
+            const raw = localStorage.getItem('vologdaUnifiedDB_v5');
             if (raw) {
-                try { db = { ...db, ...JSON.parse(raw) }; } catch (e) {}
+                try {
+                    const parsed = JSON.parse(raw);
+                    db = { ...db, ...parsed };
+                } catch (e) {}
             }
-            if (db.deviceId) document.getElementById('deviceIdInput').value = db.deviceId;
+
+            if (db.deviceId) {
+                document.getElementById('deviceIdInput').value = db.deviceId;
+            }
 
             updateClock();
             setInterval(updateClock, 1000);
@@ -637,7 +741,11 @@
             document.getElementById('monthPicker').value = `${yyyy}-${mm}`;
             document.getElementById('shiftDate').value = `${yyyy}-${mm}-${dd}`;
 
-            document.getElementById('monthPicker').addEventListener('change', () => { loadMonthNorm(); renderAll(); });
+            document.getElementById('monthPicker').addEventListener('change', () => {
+                loadMonthNorm();
+                renderAll();
+            });
+
             document.getElementById('monthlyNormInput').addEventListener('input', (e) => {
                 db.norms[document.getElementById('monthPicker').value] = Number(e.target.value) || 160;
                 persistDatabase();
@@ -646,8 +754,10 @@
 
             loadMonthNorm();
             populateRoutesUI();
-            selectRoute(db.routes[0].id);
+            selectRoute(db.routes[1].id);
             renderAll();
+
+          
             initLeafletMap();
             connectMqttBroker();
         }
@@ -661,13 +771,13 @@
             if (tab === 'gps') {
                 vCockpit.classList.add('hidden');
                 vGps.classList.remove('hidden');
-                bGps.className = 'px-4 py-2 rounded-xl bg-sky-500 text-slate-950 font-extrabold text-xs flex items-center gap-2 transition shadow-lg';
+                bGps.className = 'px-4 py-2 rounded-xl bg-sky-500 text-slate-950 font-extrabold text-xs flex items-center gap-2 transition shadow-lg shadow-sky-500/20';
                 bCockpit.className = 'px-4 py-2 rounded-xl text-slate-300 hover:text-white font-bold text-xs flex items-center gap-2 transition';
                 setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 150);
             } else {
                 vGps.classList.add('hidden');
                 vCockpit.classList.remove('hidden');
-                bCockpit.className = 'px-4 py-2 rounded-xl bg-sky-500 text-slate-950 font-extrabold text-xs flex items-center gap-2 transition shadow-lg';
+                bCockpit.className = 'px-4 py-2 rounded-xl bg-sky-500 text-slate-950 font-extrabold text-xs flex items-center gap-2 transition shadow-lg shadow-sky-500/20';
                 bGps.className = 'px-4 py-2 rounded-xl text-slate-300 hover:text-white font-bold text-xs flex items-center gap-2 transition';
             }
         }
@@ -678,18 +788,35 @@
             document.getElementById('liveDateText').textContent = now.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short' });
         }
 
+        
         function initLeafletMap() {
-            leafletMap = L.map('liveGpsMap').setView([59.7, 42.0], 7);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(leafletMap);
-            L.circleMarker([ATP_BASE_COORDS.lat, ATP_BASE_COORDS.lng], { radius: 9, fillColor: '#10b981', color: '#050811', weight: 2, fillOpacity: 0.95 }).addTo(leafletMap).bindPopup(`<b>${ATP_BASE_COORDS.name}</b>`);
+            leafletMap = L.map('liveGpsMap').setView([59.55, 41.8], 7);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '© OSM • Вологда'
+            }).addTo(leafletMap);
 
+            
+            L.circleMarker([ATP_BASE_COORDS.lat, ATP_BASE_COORDS.lng], {
+                radius: 9, fillColor: '#10b981', color: '#050811', weight: 2, fillOpacity: 0.95
+            }).addTo(leafletMap).bindPopup(`<b>${ATP_BASE_COORDS.name}</b>`);
+
+           
             db.routes.forEach(r => {
                 if (r.lat && r.lng) {
-                    L.circleMarker([r.lat, r.lng], { radius: 6, fillColor: '#38bdf8', color: '#050811', weight: 2, fillOpacity: 0.9 }).addTo(leafletMap).bindPopup(`<b>${r.name}</b><br>${r.address}`);
+                    L.circleMarker([r.lat, r.lng], {
+                        radius: 6, fillColor: '#38bdf8', color: '#050811', weight: 2, fillOpacity: 0.9
+                    }).addTo(leafletMap).bindPopup(`<b>${r.name}</b><br>${r.address}`);
                 }
             });
 
-            const truckIcon = L.divIcon({ className: '', html: `<div class="truck-gps-marker"><i class="fa-solid fa-truck-fast"></i></div>`, iconSize: [44, 44], iconAnchor: [22, 22] });
+            const truckIcon = L.divIcon({
+                className: '',
+                html: `<div class="truck-gps-marker"><i class="fa-solid fa-truck-fast"></i></div>`,
+                iconSize: [44, 44],
+                iconAnchor: [22, 22]
+            });
+
             truckMarker = L.marker([ATP_BASE_COORDS.lat, ATP_BASE_COORDS.lng], { icon: truckIcon }).addTo(leafletMap);
             trackPolyline = L.polyline([], { color: '#38bdf8', weight: 4, opacity: 0.85 }).addTo(leafletMap);
             targetLine = L.polyline([], { color: '#10b981', weight: 2, dashArray: '6, 8', opacity: 0.7 }).addTo(leafletMap);
@@ -700,132 +827,348 @@
             const devId = document.getElementById('deviceIdInput').value.trim() || 'kamaz54';
             db.deviceId = devId;
             persistDatabase();
+
             if (mqttClient) mqttClient.end();
 
+            const badge = document.getElementById('mqttConnBadge');
+            badge.textContent = 'Подключение к облаку...';
+
             mqttClient = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
+
+         
+            const ownTracksTopic = `owntracks/+/${devId}`;
+            const webCustomTopic = `vologda/atp35/live/${devId}`;
+
             mqttClient.on('connect', () => {
-                document.getElementById('mqttConnBadge').textContent = `В ЭФИРЕ (${devId})`;
-                document.getElementById('mqttConnBadge').className = 'px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold mono';
-                mqttClient.subscribe([`owntracks/+/${devId}`, `vologda/atp35/live/${devId}`], { qos: 0 });
+                badge.textContent = `В ЭФИРЕ • ID: ${devId}`;
+                badge.className = 'px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold mono';
+                mqttClient.subscribe([ownTracksTopic, webCustomTopic], { qos: 0 });
             });
+
             mqttClient.on('message', (topic, message) => {
                 try {
-                    const pkt = JSON.parse(message.toString());
-                    if (pkt._type === 'location' || (pkt.lat !== undefined && pkt.lon !== undefined)) {
-                        handleOwnTracksPacket(pkt);
+                    const packet = JSON.parse(message.toString());
+                    
+                    
+                    if (packet._type === 'location' || (packet.lat !== undefined && packet.lon !== undefined)) {
+                        handleOwnTracksPacket(packet);
+                    } else if (packet.lat !== undefined && packet.lng !== undefined) {
+                        // Пакет от встроенного браузерного передатчика
+                        applyUnifiedTelemetry(packet);
                     }
-                } catch (e) {}
+                } catch (e) { console.error('Ошибка разбора GPS пакета:', e); }
             });
         }
 
-        function reconnectMqtt() { connectMqttBroker(); }
+        function reconnectMqtt() {
+            connectMqttBroker();
+        }
 
+        
         function handleOwnTracksPacket(pkt) {
-            const lat = Number(pkt.lat), lng = Number(pkt.lon), speed = Math.max(0, Math.round(Number(pkt.vel || 0)));
-            if (!gpsTripStartTime) gpsTripStartTime = new Date();
+            const lat = Number(pkt.lat);
+            const lng = Number(pkt.lon);
+           
+            const speedKmh = Math.max(0, Math.round(Number(pkt.vel || 0)));
+            const accuracy = Math.round(Number(pkt.acc || 10));
+            const battery = pkt.batt !== undefined ? `${pkt.batt}%` : '—%';
+
+            if (!gpsTripStartTime) {
+                gpsTripStartTime = new Date();
+            }
+
             if (hasPrevFix) {
-                const step = calcHaversineKm(lastCoords.lat, lastCoords.lng, lat, lng);
-                if (step > 0.015 && step < 10) gpsSessionKm += step;
+                const stepKm = calcHaversineKm(lastCoords.lat, lastCoords.lng, lat, lng);
+                if (stepKm > 0.015 && stepKm < 10) {
+                    gpsSessionKm += stepKm;
+                }
             }
             lastCoords = { lat, lng };
             hasPrevFix = true;
-            applyUnifiedTelemetry({ lat, lng, speed, accuracy: Math.round(pkt.acc || 10), battery: pkt.batt !== undefined ? `${pkt.batt}%` : '—%', sessionKm: Number(gpsSessionKm.toFixed(2)), statusText: speed > 3 ? 'В ДВИЖЕНИИ' : 'СТОЯНКА', statusCode: speed > 3 ? 'moving' : 'parked', timestamp: new Date().toLocaleTimeString('ru-RU') });
+
+            let statusText = speedKmh > 3 ? 'В ДВИЖЕНИИ' : 'СТОЯНКА';
+            let statusCode = speedKmh > 3 ? 'moving' : 'parked';
+
+            if (manualStatusOverride === 'rest') {
+                statusText = 'ОТДЫХ / ОБЕД';
+                statusCode = 'rest';
+            }
+
+            const timeStr = pkt.tst ? new Date(pkt.tst * 1000).toLocaleTimeString('ru-RU') : new Date().toLocaleTimeString('ru-RU');
+
+            applyUnifiedTelemetry({
+                source: 'OwnTracks App',
+                lat,
+                lng,
+                speed: speedKmh,
+                accuracy,
+                battery,
+                sessionKm: Number(gpsSessionKm.toFixed(2)),
+                statusText,
+                statusCode,
+                timestamp: timeStr
+            });
         }
 
         function applyUnifiedTelemetry(data) {
-            document.getElementById('gpsSourceBadge').textContent = `Источник: OwnTracks`;
+            lastCoords = { lat: data.lat, lng: data.lng };
+
+            document.getElementById('gpsSourceBadge').textContent = `Источник: ${data.source || 'GPS Маяк'}`;
             document.getElementById('liveSpeedVal').textContent = data.speed;
             document.getElementById('liveSessionKm').textContent = (data.sessionKm || gpsSessionKm).toFixed(1);
-            document.getElementById('lastUpdateText').textContent = `Сигнал ${data.timestamp}`;
-            document.getElementById('phoneBatteryText').textContent = `Батарея: ${data.battery}`;
-            document.getElementById('tabLiveSpeedBadge').classList.remove('hidden');
-            document.getElementById('tabLiveSpeedBadge').textContent = `${data.speed} км/ч`;
+            document.getElementById('lastUpdateText').textContent = `Сигнал в ${data.timestamp}`;
+            document.getElementById('phoneBatteryText').textContent = `Заряд: ${data.battery || '—'} • Точн: ±${data.accuracy || 10}м`;
+
+           
+            const topBadge = document.getElementById('tabLiveSpeedBadge');
+            topBadge.classList.remove('hidden');
+            topBadge.textContent = `${data.speed} км/ч`;
 
             const stEl = document.getElementById('liveVehicleStatus');
-            stEl.innerHTML = `<span class="w-2.5 h-2.5 rounded-full ${data.statusCode === 'moving' ? 'bg-emerald-400 animate-ping' : 'bg-amber-400'}"></span><span>${data.statusText}</span>`;
+            if (data.statusCode === 'moving') {
+                stEl.className = 'text-sm font-extrabold text-emerald-400 mt-1.5 flex items-center gap-1.5';
+                stEl.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span><span>${data.statusText}</span>`;
+            } else if (data.statusCode === 'rest') {
+                stEl.className = 'text-sm font-extrabold text-sky-400 mt-1.5 flex items-center gap-1.5';
+                stEl.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span><span>${data.statusText}</span>`;
+            } else {
+                stEl.className = 'text-sm font-extrabold text-amber-400 mt-1.5 flex items-center gap-1.5';
+                stEl.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span><span>${data.statusText}</span>`;
+            }
 
             if (truckMarker && leafletMap) {
                 const pos = [data.lat, data.lng];
                 truckMarker.setLatLng(pos);
+                truckMarker.bindPopup(`<b>Борт: ${db.deviceId}</b><br>Скорость: ${data.speed} км/ч<br>Статус: ${data.statusText}`);
                 trackPolyline.addLatLng(pos);
                 updateTargetDistance();
             }
         }
 
+       
         function transferGpsTripToTimesheet() {
+            const destId = document.getElementById('destSelect').value;
+            if (db.routes.some(r => r.id === destId)) {
+                selectRoute(destId);
+            }
+
+            const now = new Date();
+            const endStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            if (gpsTripStartTime) {
+                const startStr = `${String(gpsTripStartTime.getHours()).padStart(2, '0')}:${String(gpsTripStartTime.getMinutes()).padStart(2, '0')}`;
+                document.getElementById('shiftStart').value = startStr;
+            }
+            document.getElementById('shiftEnd').value = endStr;
+
+          
+            if (gpsSessionKm >= 1) {
+                const roundedKm = Math.round(gpsSessionKm);
+                document.getElementById('shiftMileage').value = roundedKm;
+                onMileageManualInput();
+            }
+
+            updateLiveShiftPreview();
             switchMainTab('cockpit');
             window.scrollTo({ top: 280, behavior: 'smooth' });
         }
 
         function resetGpsTripCounter() {
-            if (!confirm('Обнулить пробег GPS?')) return;
-            gpsSessionKm = 0; gpsTripStartTime = new Date();
+            if (!confirm('Обнулить счетчик пробега текущей поездки GPS?')) return;
+            gpsSessionKm = 0;
+            gpsTripStartTime = new Date();
             if (trackPolyline) trackPolyline.setLatLngs([]);
             document.getElementById('liveSessionKm').textContent = '0.0';
         }
 
-        function centerMapOnTruck() { if (leafletMap) leafletMap.flyTo([lastCoords.lat, lastCoords.lng], 12); }
-        function calcHaversineKm(lat1, lon1, lat2, lon2) {
-            const R = 6371, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        function sendManualStatus(mode) {
+            manualStatusOverride = mode;
+        }
+
+        function toggleBrowserGps() {
+            const btn = document.getElementById('browserGpsBtn');
+            if (browserWatchId !== null) {
+                navigator.geolocation.clearWatch(browserWatchId);
+                browserWatchId = null;
+                btn.innerHTML = '<i class="fa-solid fa-mobile-screen"></i><span>Встроенный GPS браузера</span>';
+                return;
+            }
+            if (!navigator.geolocation) {
+                alert('Геолокация не поддерживается браузером');
+                return;
+            }
+            gpsTripStartTime = new Date();
+            btn.innerHTML = '<i class="fa-solid fa-circle-stop text-rose-400 animate-pulse"></i><span>Остановить GPS браузера</span>';
+
+            browserWatchId = navigator.geolocation.watchPosition((pos) => {
+                const pkt = {
+                    _type: 'location',
+                    lat: pos.coords.latitude,
+                    lon: pos.coords.longitude,
+                    vel: Math.max(0, Math.round((pos.coords.speed || 0) * 3.6)),
+                    acc: Math.round(pos.coords.accuracy || 10),
+                    tst: Math.floor(Date.now() / 1000)
+                };
+                if (mqttClient && mqttClient.connected) {
+                    mqttClient.publish(`owntracks/web/${db.deviceId}`, JSON.stringify(pkt), { qos: 0, retain: true });
+                }
+                handleOwnTracksPacket(pkt);
+            }, () => {}, { enableHighAccuracy: true });
         }
 
         function updateTargetDistance() {
-            const dest = document.getElementById('destSelect').value;
-            let t = ATP_BASE_COORDS;
-            if (dest === 'totma') t = db.routes.find(r => r.id === 'totma_sov10');
-            if (dest === 'nikolsk') t = db.routes.find(r => r.id === 'nikolsk_sov113');
-            const roadKm = Math.round(calcHaversineKm(lastCoords.lat, lastCoords.lng, t.lat, t.lng) * 1.22);
+            const destKey = document.getElementById('destSelect').value;
+            let target = ATP_BASE_COORDS;
+            if (destKey !== 'atp_base') {
+                const found = db.routes.find(r => r.id === destKey);
+                if (found && found.lat) target = found;
+            }
+
+            const airKm = calcHaversineKm(lastCoords.lat, lastCoords.lng, target.lat, target.lng);
+            const roadKm = Math.round(airKm * 1.22);
             document.getElementById('distToDestVal').textContent = `~${roadKm} км`;
-            if (targetLine) targetLine.setLatLngs([[lastCoords.lat, lastCoords.lng], [t.lat, t.lng]]);
+
+            const speed = Number(document.getElementById('liveSpeedVal').textContent) || 70;
+            const calcSpeed = speed > 25 ? speed : 70;
+            const hoursLeft = roadKm / calcSpeed;
+            const h = Math.floor(hoursLeft);
+            const m = Math.round((hoursLeft - h) * 60);
+            document.getElementById('etaVal').textContent = `В пути ~${h}ч ${m}м`;
+
+            if (targetLine) {
+                targetLine.setLatLngs([[lastCoords.lat, lastCoords.lng], [target.lat, target.lng]]);
+            }
         }
 
-        // РАСЧЕТ И УПРАВЛЕНИЕ МАРШРУТАМИ В ТАБЕЛЕ
+        function centerMapOnTruck() {
+            if (leafletMap) leafletMap.flyTo([lastCoords.lat, lastCoords.lng], 12, { duration: 1 });
+        }
+
+        function calcHaversineKm(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        
+        async function persistDatabase() {
+            localStorage.setItem('vologdaUnifiedDB_v5', JSON.stringify(db));
+            if (fileHandle) {
+                try {
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(JSON.stringify(db, null, 2));
+                    await writable.close();
+                    document.getElementById('fileStatusText').textContent = `Сохранено: ${fileHandle.name}`;
+                } catch (e) {}
+            }
+        }
+
+        async function bindLocalFile() {
+            if (!window.showSaveFilePicker) {
+                alert('Используйте кнопки скачивания/загрузки файла рядом (ваш браузер не поддерживает прямую перезапись).');
+                return;
+            }
+            try {
+                fileHandle = await window.showSaveFilePicker({
+                    suggestedName: 'vologda_atp_database.json',
+                    types: [{ description: 'JSON База АТП', accept: { 'application/json': ['.json'] } }]
+                });
+                await persistDatabase();
+            } catch (e) {}
+        }
+
+        function downloadBackupFile() {
+            const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `vologda_atp_db_${document.getElementById('monthPicker').value}.json`;
+            a.click();
+        }
+
+        function importBackupFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    db = { ...db, ...JSON.parse(e.target.result) };
+                    persistDatabase();
+                    loadMonthNorm();
+                    populateRoutesUI();
+                    renderAll();
+                } catch (err) { alert('Ошибка чтения файла!'); }
+            };
+            reader.readAsText(file);
+        }
+
+        function loadMonthNorm() {
+            const m = document.getElementById('monthPicker').value;
+            document.getElementById('monthlyNormInput').value = db.norms[m] !== undefined ? db.norms[m] : 160;
+        }
+
         function populateRoutesUI() {
             const select = document.getElementById('shiftRouteSelect');
             const pills = document.getElementById('quickRoutesPills');
-            select.innerHTML = ''; pills.innerHTML = '';
+            select.innerHTML = '';
+            pills.innerHTML = '';
 
             db.routes.forEach(r => {
                 const opt = document.createElement('option');
                 opt.value = r.id;
-                opt.textContent = `${r.name} (${r.oneWayKm * 2} км круг)`;
+                opt.textContent = `${r.name} (${r.oneWayKm} / ${r.oneWayKm * 2} км)`;
                 select.appendChild(opt);
 
                 const btn = document.createElement('button');
                 btn.type = 'button';
                 const active = r.id === activeRouteId;
-                btn.className = active ? 'px-3 py-1.5 rounded-xl bg-sky-500 text-slate-950 font-extrabold text-xs transition' : 'px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-semibold transition';
-                btn.textContent = r.name.replace('Вологда — ', '');
+                btn.className = active
+                    ? 'px-3 py-1.5 rounded-xl bg-sky-500 text-slate-950 font-extrabold text-xs transition'
+                    : 'px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-semibold transition';
+                btn.textContent = `${r.name.replace('Вологда АТП — ', '')} (${r.oneWayKm * 2} км)`;
                 btn.onclick = () => selectRoute(r.id);
                 pills.appendChild(btn);
             });
+
             renderRadarSvg();
             renderRoutesEditorTable();
         }
 
         function renderRadarSvg() {
-            const linesG = document.getElementById('mapLinesGroup'), nodesG = document.getElementById('mapNodesGroup');
-            linesG.innerHTML = ''; nodesG.innerHTML = '';
+            const linesG = document.getElementById('mapLinesGroup');
+            const nodesG = document.getElementById('mapNodesGroup');
+            linesG.innerHTML = '';
+            nodesG.innerHTML = '';
             const hubX = 150, hubY = 210;
 
             db.routes.forEach((r, idx) => {
-                const tx = r.mapX || 300, ty = r.mapY || 120, active = r.id === activeRouteId;
+                const tx = r.mapX || (250 + ((idx * 70) % 380));
+                const ty = r.mapY || (60 + ((idx * 50) % 190));
+                const active = r.id === activeRouteId;
+
                 const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                line.setAttribute('x1', hubX); line.setAttribute('y1', hubY); line.setAttribute('x2', tx); line.setAttribute('y2', ty);
-                line.setAttribute('stroke', active ? '#38bdf8' : '#334155'); line.setAttribute('stroke-width', active ? '3.5' : '1.8');
+                line.setAttribute('x1', hubX); line.setAttribute('y1', hubY);
+                line.setAttribute('x2', tx); line.setAttribute('y2', ty);
+                line.setAttribute('stroke', active ? '#38bdf8' : '#334155');
+                line.setAttribute('stroke-width', active ? '3.5' : '1.8');
                 if (active) line.setAttribute('class', 'route-active-line');
                 linesG.appendChild(line);
 
                 const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                 g.setAttribute('class', 'cursor-pointer');
                 g.onclick = () => selectRoute(r.id);
-                g.innerHTML = `<circle cx="${tx}" cy="${ty}" r="${active ? 7 : 5}" fill="${active ? '#00f2fe' : '#64748b'}" stroke="#0f172a" stroke-width="2"/><text x="${tx}" y="${ty - 11}" text-anchor="middle" fill="${active ? '#fff' : '#94a3b8'}" font-size="11" font-weight="700">${r.name.replace('Вологда — ', '')}</text>`;
+                g.innerHTML = `
+                    <circle cx="${tx}" cy="${ty}" r="${active ? 7 : 5}" fill="${active ? '#00f2fe' : '#64748b'}" stroke="#0f172a" stroke-width="2"/>
+                    <text x="${tx}" y="${ty - 11}" text-anchor="middle" fill="${active ? '#fff' : '#94a3b8'}" font-size="11" font-weight="700">${r.name.replace('Вологда АТП — ', '')} (${r.oneWayKm} км)</text>
+                `;
                 nodesG.appendChild(g);
             });
+
             const baseG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            baseG.innerHTML = `<circle cx="${hubX}" cy="${hubY}" r="9" fill="#10b981" stroke="#050811" stroke-width="3"/><text x="${hubX}" y="${hubY + 22}" text-anchor="middle" fill="#10b981" font-size="11" font-weight="800">АТП ВОЛОГДА</text>`;
+            baseG.innerHTML = `
+                <circle cx="${hubX}" cy="${hubY}" r="9" fill="#10b981" stroke="#050811" stroke-width="3"/>
+                <text x="${hubX}" y="${hubY + 22}" text-anchor="middle" fill="#10b981" font-size="11" font-weight="800">ВОЛОГДА АТП</text>
+            `;
             nodesG.appendChild(baseG);
         }
 
@@ -835,39 +1178,12 @@
             activeRouteId = r.id;
             document.getElementById('shiftRouteSelect').value = r.id;
 
-            const reqBox = document.getElementById('requestOptionsBox');
-            if (r.isCustomRoute) {
-                reqBox.classList.remove('hidden');
-            } else {
-                reqBox.classList.add('hidden');
-                document.getElementById('reqNikolsk').checked = false;
-                document.getElementById('reqUstyug').checked = false;
-            }
-
-            recalcCustomRoute();
-        }
-
-        function recalcCustomRoute() {
-            const r = db.routes.find(item => item.id === activeRouteId);
-            if (!r) return;
-
-            let oneWay = r.oneWayKm;
-            let bonus = r.bonus;
-            let noteExtra = '';
-
-            if (r.isCustomRoute) {
-                const nik = document.getElementById('reqNikolsk').checked;
-                const ust = document.getElementById('reqUstyug').checked;
-                if (nik) { oneWay += 70; bonus += 300; noteExtra += ' + Никольск'; }
-                if (ust) { oneWay += 80; bonus += 350; noteExtra += ' + В.Устюг'; }
-            }
-
             const mult = currentTripMode === 'round' ? 2 : 1;
-            const totalKm = oneWay * mult;
+            const totalKm = r.oneWayKm * mult;
             const fuel = ((totalKm / 100) * db.rates.fuelNorm100).toFixed(1);
 
-            document.getElementById('cardRouteName').textContent = r.name + noteExtra;
-            document.getElementById('cardRouteAddr').textContent = r.address + noteExtra;
+            document.getElementById('cardRouteName').textContent = r.name;
+            document.getElementById('cardRouteAddr').textContent = r.address;
             document.getElementById('cardRouteKm').textContent = `${totalKm} км`;
 
             if (!document.getElementById('editShiftId').value) {
@@ -876,18 +1192,22 @@
                 document.getElementById('shiftBreak').value = r.breakMins;
                 document.getElementById('shiftMileage').value = totalKm;
                 document.getElementById('shiftFuel').value = fuel;
-                document.getElementById('shiftBonus').value = bonus;
-                document.getElementById('shiftNotes').value = `${r.name}${noteExtra} (${currentTripMode === 'round' ? 'Круг' : '1 ст.'})`;
+                document.getElementById('shiftBonus').value = r.bonus;
+                document.getElementById('shiftNotes').value = `${r.address} (${currentTripMode === 'round' ? 'Круг' : '1 ст.'})`;
             }
+            populateRoutesUI();
             updateLiveShiftPreview();
         }
 
-        function onRouteSelectChange() { selectRoute(document.getElementById('shiftRouteSelect').value); }
+        function onRouteSelectChange() {
+            selectRoute(document.getElementById('shiftRouteSelect').value);
+        }
+
         function setTripMode(mode) {
             currentTripMode = mode;
             document.getElementById('tripModeRound').className = mode === 'round' ? 'px-3 py-1 rounded-md bg-sky-500 text-slate-950' : 'px-3 py-1 rounded-md text-slate-400';
             document.getElementById('tripModeSingle').className = mode === 'single' ? 'px-3 py-1 rounded-md bg-sky-500 text-slate-950' : 'px-3 py-1 rounded-md text-slate-400';
-            recalcCustomRoute();
+            selectRoute(activeRouteId);
         }
 
         function onMileageManualInput() {
@@ -915,7 +1235,11 @@
         }
 
         function updateLiveShiftPreview() {
-            const netMins = calcNetMinutes(document.getElementById('shiftStart').value, document.getElementById('shiftEnd').value, document.getElementById('shiftBreak').value);
+            const netMins = calcNetMinutes(
+                document.getElementById('shiftStart').value,
+                document.getElementById('shiftEnd').value,
+                document.getElementById('shiftBreak').value
+            );
             const sal = calcShiftSalary(netMins, document.getElementById('shiftMileage').value, document.getElementById('shiftBonus').value);
             document.getElementById('previewNetHours').textContent = formatHoursMins(netMins);
             document.getElementById('previewShiftSalary').textContent = `${sal.toLocaleString('ru-RU')} ₽`;
@@ -927,7 +1251,8 @@
             const date = document.getElementById('shiftDate').value;
             const routeId = document.getElementById('shiftRouteSelect').value;
             const rObj = db.routes.find(r => r.id === routeId);
-            const start = document.getElementById('shiftStart').value, end = document.getElementById('shiftEnd').value;
+            const start = document.getElementById('shiftStart').value;
+            const end = document.getElementById('shiftEnd').value;
             const breakMins = Number(document.getElementById('shiftBreak').value) || 0;
             const mileage = Number(document.getElementById('shiftMileage').value) || 0;
             const fuel = Number(document.getElementById('shiftFuel').value) || 0;
@@ -935,11 +1260,13 @@
             const notes = document.getElementById('shiftNotes').value.trim();
             const netMinutes = calcNetMinutes(start, end, breakMins);
 
-            const rec = { id: editId || ('s_' + Date.now()), date, routeId, routeName: document.getElementById('cardRouteName').textContent, start, end, breakMins, mileage, fuel, bonus, notes, netMinutes };
+            const rec = { id: editId || ('s_' + Date.now()), date, routeId, routeName: rObj ? rObj.name : 'Рейс АТП', start, end, breakMins, mileage, fuel, bonus, notes, netMinutes };
             if (editId) {
                 const i = db.shifts.findIndex(s => s.id === editId);
                 if (i !== -1) db.shifts[i] = rec;
-            } else { db.shifts.push(rec); }
+            } else {
+                db.shifts.push(rec);
+            }
 
             persistDatabase();
             resetShiftForm();
@@ -963,9 +1290,10 @@
         }
 
         function deleteShift(id) {
-            if (!confirm('Удалить смену?')) return;
+            if (!confirm('Удалить эту смену?')) return;
             db.shifts = db.shifts.filter(s => s.id !== id);
-            persistDatabase(); renderAll();
+            persistDatabase();
+            renderAll();
         }
 
         function resetShiftForm() {
@@ -982,6 +1310,7 @@
             const list = db.shifts.filter(s => s.date.startsWith(m)).sort((a, b) => a.date.localeCompare(b.date));
             const tbody = document.getElementById('shiftsTableBody');
             tbody.innerHTML = '';
+
             let totalMins = 0, totalKm = 0, totalFuel = 0, totalSal = 0;
 
             if (list.length === 0) {
@@ -989,20 +1318,34 @@
             } else {
                 document.getElementById('emptyShiftsState').classList.add('hidden');
                 list.forEach(s => {
-                    totalMins += s.netMinutes; totalKm += Number(s.mileage) || 0; totalFuel += Number(s.fuel) || 0;
+                    totalMins += s.netMinutes;
+                    totalKm += Number(s.mileage) || 0;
+                    totalFuel += Number(s.fuel) || 0;
                     const pay = calcShiftSalary(s.netMinutes, s.mileage, s.bonus);
                     totalSal += pay;
 
                     const dStr = new Date(s.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', weekday: 'short' });
                     const tr = document.createElement('tr');
                     tr.className = 'hover:bg-slate-900/60';
-                    tr.innerHTML = `<td class="py-3 px-5 font-bold text-white mono">${dStr}</td><td class="py-3 px-4"><div class="font-bold text-sky-300 text-xs">${s.routeName}</div><div class="text-[11px] text-slate-400">${s.notes || ''}</div></td><td class="py-3 px-4 mono text-xs text-slate-300">${s.start} — ${s.end}</td><td class="py-3 px-4 font-extrabold text-sky-400 mono">${formatHoursMins(s.netMinutes)}</td><td class="py-3 px-4 font-bold text-indigo-300 mono">${s.mileage} км</td><td class="py-3 px-4 font-bold text-amber-300 mono">${Number(s.fuel).toFixed(1)} л</td><td class="py-3 px-4 font-extrabold text-emerald-400 mono">${pay.toLocaleString('ru-RU')} ₽</td><td class="py-3 px-5 text-right space-x-1"><button onclick="editShift('${s.id}')" class="p-1.5 text-slate-400 hover:text-sky-300"><i class="fa-solid fa-pen"></i></button><button onclick="deleteShift('${s.id}')" class="p-1.5 text-slate-400 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button></td>`;
+                    tr.innerHTML = `
+                        <td class="py-3 px-5 font-bold text-white mono">${dStr}</td>
+                        <td class="py-3 px-4"><div class="font-bold text-sky-300 text-xs">${s.routeName}</div><div class="text-[11px] text-slate-400">${s.notes || ''}</div></td>
+                        <td class="py-3 px-4 mono text-xs text-slate-300">${s.start} — ${s.end}</td>
+                        <td class="py-3 px-4 font-extrabold text-sky-400 mono">${formatHoursMins(s.netMinutes)}</td>
+                        <td class="py-3 px-4 font-bold text-indigo-300 mono">${s.mileage} км</td>
+                        <td class="py-3 px-4 font-bold text-amber-300 mono">${Number(s.fuel).toFixed(1)} л</td>
+                        <td class="py-3 px-4 font-extrabold text-emerald-400 mono">${pay.toLocaleString('ru-RU')} ₽</td>
+                        <td class="py-3 px-5 text-right space-x-1">
+                            <button onclick="editShift('${s.id}')" class="p-1.5 text-slate-400 hover:text-sky-300"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteShift('${s.id}')" class="p-1.5 text-slate-400 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    `;
                     tbody.appendChild(tr);
                 });
             }
 
             document.getElementById('statWorkedHours').textContent = formatHoursMins(totalMins);
-            document.getElementById('statShiftsTotal').textContent = `Смен: ${list.length}`;
+            document.getElementById('statShiftsTotal').textContent = `Выполнено смен: ${list.length}`;
             document.getElementById('statTotalKm').textContent = `${totalKm.toLocaleString('ru-RU')} км`;
             document.getElementById('statTotalFuel').textContent = `${totalFuel.toFixed(1)} л`;
             document.getElementById('statFuelCost').textContent = `${Math.round(totalFuel * db.rates.fuelPrice).toLocaleString('ru-RU')} ₽`;
@@ -1014,7 +1357,7 @@
                 document.getElementById('statRemainHours').textContent = formatHoursMins(diff);
                 document.getElementById('overtimeBadge').classList.add('hidden');
             } else {
-                document.getElementById('statRemainTitle').textContent = 'Переработка';
+                document.getElementById('statRemainTitle').textContent = 'Переработка сверх нормы';
                 document.getElementById('statRemainHours').textContent = `+${formatHoursMins(Math.abs(diff))}`;
                 document.getElementById('overtimeBadge').classList.remove('hidden');
             }
@@ -1028,12 +1371,22 @@
             document.getElementById('truckContainer').style.left = `calc(${clamped}% - 55px)`;
         }
 
+        
         function renderRoutesEditorTable() {
             const tbody = document.getElementById('routesEditorBody');
             tbody.innerHTML = '';
             db.routes.forEach(r => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td class="p-3 font-bold text-white">${r.name}</td><td class="p-3 text-slate-400">${r.address}</td><td class="p-3 mono text-sky-400">${r.oneWayKm} км</td><td class="p-3 mono text-indigo-300">${r.oneWayKm * 2} км</td><td class="p-3 mono text-emerald-400">${r.bonus} ₽</td><td class="p-3 text-right"><button onclick="loadRouteToEdit('${r.id}')" class="px-2 py-1 rounded bg-sky-500/20 text-sky-300">Править</button></td>`;
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-white">${r.name}</td>
+                    <td class="p-3 text-slate-400">${r.address}</td>
+                    <td class="p-3 mono text-sky-400">${r.oneWayKm} км</td>
+                    <td class="p-3 mono text-indigo-300">${r.oneWayKm * 2} км</td>
+                    <td class="p-3 mono text-emerald-400">${r.bonus} ₽</td>
+                    <td class="p-3 text-right">
+                        <button onclick="loadRouteToEdit('${r.id}')" class="px-2 py-1 rounded bg-sky-500/20 text-sky-300">Править</button>
+                    </td>
+                `;
                 tbody.appendChild(tr);
             });
         }
@@ -1046,6 +1399,9 @@
             document.getElementById('rAddress').value = r.address;
             document.getElementById('rOneWayKm').value = r.oneWayKm;
             document.getElementById('rBonus').value = r.bonus;
+            document.getElementById('rStart').value = r.start;
+            document.getElementById('rEnd').value = r.end;
+            document.getElementById('rBreak').value = r.breakMins;
         }
 
         document.getElementById('routeEditorForm').addEventListener('submit', function(e) {
@@ -1055,64 +1411,60 @@
             const address = document.getElementById('rAddress').value.trim();
             const oneWayKm = Number(document.getElementById('rOneWayKm').value) || 10;
             const bonus = Number(document.getElementById('rBonus').value) || 0;
+            const start = document.getElementById('rStart').value;
+            const end = document.getElementById('rEnd').value;
+            const breakMins = Number(document.getElementById('rBreak').value) || 0;
 
             if (id) {
                 const idx = db.routes.findIndex(r => r.id === id);
-                if (idx !== -1) db.routes[idx] = { ...db.routes[idx], name, address, oneWayKm, bonus };
+                if (idx !== -1) db.routes[idx] = { ...db.routes[idx], name, address, oneWayKm, bonus, start, end, breakMins };
             } else {
-                db.routes.push({ id: 'r_' + Date.now(), name, address, oneWayKm, bonus, start: '06:00', end: '18:00', breakMins: 60, mapX: 300, mapY: 120, lat: 60.0, lng: 43.0 });
+                db.routes.push({ id: 'r_' + Date.now(), name, address, oneWayKm, bonus, start, end, breakMins, mapX: 300, mapY: 120, lat: 59.5, lng: 41.5 });
             }
             document.getElementById('routeEditorForm').reset();
             document.getElementById('editRouteId').value = '';
-            persistDatabase(); populateRoutesUI(); selectRoute(activeRouteId);
+            persistDatabase();
+            populateRoutesUI();
+            selectRoute(activeRouteId);
         });
 
-        async function persistDatabase() {
-            localStorage.setItem('vologdaUnifiedDB_v6', JSON.stringify(db));
-            if (fileHandle) {
-                try {
-                    const writable = await fileHandle.createWritable();
-                    await writable.write(JSON.stringify(db, null, 2));
-                    await writable.close();
-                } catch (e) {}
-            }
-        }
-
-        async function bindLocalFile() {
-            if (!window.showSaveFilePicker) return alert('Используйте кнопки скачивания/загрузки файла.');
-            try { fileHandle = await window.showSaveFilePicker({ suggestedName: 'vologda_atp_database.json' }); await persistDatabase(); } catch (e) {}
-        }
-        function downloadBackupFile() {
-            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' }));
-            a.download = `vologda_atp_db_${document.getElementById('monthPicker').value}.json`; a.click();
-        }
-        function importBackupFile(event) {
-            const file = event.target.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => { db = { ...db, ...JSON.parse(e.target.result) }; persistDatabase(); loadMonthNorm(); populateRoutesUI(); renderAll(); };
-            reader.readAsText(file);
-        }
-        function loadMonthNorm() { document.getElementById('monthlyNormInput').value = db.norms[document.getElementById('monthPicker').value] !== undefined ? db.norms[monthPicker.value] : 160; }
         function openModal(id) {
             if (id === 'ratesModal') {
-                document.getElementById('cfgRateHour').value = db.rates.perHour; document.getElementById('cfgRateKm').value = db.rates.perKm;
-                document.getElementById('cfgFuelNorm100').value = db.rates.fuelNorm100; document.getElementById('cfgFuelPrice').value = db.rates.fuelPrice;
+                document.getElementById('cfgRateHour').value = db.rates.perHour;
+                document.getElementById('cfgRateKm').value = db.rates.perKm;
+                document.getElementById('cfgFuelNorm100').value = db.rates.fuelNorm100;
+                document.getElementById('cfgFuelPrice').value = db.rates.fuelPrice;
             }
             document.getElementById(id).classList.remove('hidden');
         }
+
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
         function saveRatesConfig() {
-            db.rates.perHour = Number(document.getElementById('cfgRateHour').value) || 0; db.rates.perKm = Number(document.getElementById('cfgRateKm').value) || 0;
-            db.rates.fuelNorm100 = Number(document.getElementById('cfgFuelNorm100').value) || 28; db.rates.fuelPrice = Number(document.getElementById('cfgFuelPrice').value) || 64;
-            persistDatabase(); closeModal('ratesModal'); selectRoute(activeRouteId); renderAll();
+            db.rates.perHour = Number(document.getElementById('cfgRateHour').value) || 0;
+            db.rates.perKm = Number(document.getElementById('cfgRateKm').value) || 0;
+            db.rates.fuelNorm100 = Number(document.getElementById('cfgFuelNorm100').value) || 28;
+            db.rates.fuelPrice = Number(document.getElementById('cfgFuelPrice').value) || 64;
+            persistDatabase();
+            closeModal('ratesModal');
+            selectRoute(activeRouteId);
+            renderAll();
         }
+
         function exportToExcelCSV() {
-            const m = document.getElementById('monthPicker').value; const list = db.shifts.filter(s => s.date.startsWith(m));
-            if (!list.length) return alert('Нет данных');
-            let csv = '\uFEFFДата;Маршрут;Адрес;Выезд;Возврат;Обед;Часы;Пробег;ДТ;Зарплата\n';
-            list.forEach(s => { csv += `${s.date};"${s.routeName}";"${s.notes}";${s.start};${s.end};${s.breakMins};${(s.netMinutes/60).toFixed(2).replace('.', ',')};${s.mileage};${s.fuel};${calcShiftSalary(s.netMinutes, s.mileage, s.bonus)}\n`; });
-            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-            a.download = `Табель_${m}.csv`; a.click();
+            const m = document.getElementById('monthPicker').value;
+            const list = db.shifts.filter(s => s.date.startsWith(m));
+            if (!list.length) { alert('Нет смен за этот месяц'); return; }
+            let csv = '\uFEFFДата;Маршрут;Адрес;Выезд;Возврат;Обед;Часы;Пробег(км);ДТ(л);Зарплата(руб)\n';
+            list.forEach(s => {
+                const h = (s.netMinutes / 60).toFixed(2).replace('.', ',');
+                const pay = calcShiftSalary(s.netMinutes, s.mileage, s.bonus);
+                csv += `${s.date};"${s.routeName}";"${s.notes}";${s.start};${s.end};${s.breakMins};${h};${s.mileage};${s.fuel};${pay}\n`;
+            });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+            a.download = `Табель_АТП_Вологда_${m}.csv`;
+            a.click();
         }
 
         initApp();
