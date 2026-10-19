@@ -1,0 +1,70 @@
+{
+  "deviceId": "kamaz54",
+  "norms": {},
+  "rates": {
+    "perHour": 450,
+    "perKm": 11.5,
+    "fuelNorm100": 28,
+    "fuelPrice": 64.5
+  },
+  "routes": [
+    {
+      "id": "roslyatino_wt",
+      "name": "Вологда — Тотьма — Рослятино (Вт, Чт)",
+      "address": "Гиляровского 54А → Тотьма → Рослятино (Вт, Чт)",
+      "oneWayKm": 345,
+      "start": "04:00",
+      "end": "20:00",
+      "breakMins": 60,
+      "bonus": 1200,
+      "isCustomRoute": true,
+      "mapX": 480,
+      "mapY": 150,
+      "lat": 60.15,
+      "lng": 44.25
+    },
+    {
+      "id": "totma_sov10",
+      "name": "Вологда АТП — Тотьма",
+      "address": "Гиляровского 54А → г. Тотьма, ул. Советская, 10",
+      "oneWayKm": 215,
+      "start": "06:00",
+      "end": "15:30",
+      "breakMins": 45,
+      "bonus": 700,
+      "mapX": 365,
+      "mapY": 135,
+      "lat": 59.9748,
+      "lng": 42.7592
+    },
+    {
+      "id": "nikolsk_sov113",
+      "name": "Вологда АТП — Никольск",
+      "address": "Гиляровского 54А → Никольск, Советская 113",
+      "oneWayKm": 436,
+      "start": "04:30",
+      "end": "19:30",
+      "breakMins": 60,
+      "bonus": 1000,
+      "mapX": 545,
+      "mapY": 185,
+      "lat": 59.5312,
+      "lng": 45.4518
+    },
+    {
+      "id": "ustyug",
+      "name": "Вологда АТП — Великий Устюг",
+      "address": "Гиляровского 54А → Великий Устюг",
+      "oneWayKm": 452,
+      "start": "04:00",
+      "end": "20:00",
+      "breakMins": 60,
+      "bonus": 1000,
+      "mapX": 635,
+      "mapY": 60,
+      "lat": 60.7618,
+      "lng": 46.2995
+    }
+  ],
+  "shifts": []
+}
